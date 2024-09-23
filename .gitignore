@@ -1,1 +1,4 @@
 ﻿.vs/
+# Ignore the local database files
+App_Data/Database1.mdf
+App_Data/Database1_log.ldf

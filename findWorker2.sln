@@ -1,0 +1,25 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.11.35303.130
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "findWorker2", "findWorker2.csproj", "{DC82687A-3163-4326-99E6-C3C21E98BF91}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{DC82687A-3163-4326-99E6-C3C21E98BF91}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{DC82687A-3163-4326-99E6-C3C21E98BF91}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{DC82687A-3163-4326-99E6-C3C21E98BF91}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{DC82687A-3163-4326-99E6-C3C21E98BF91}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {C2546AFF-D0F5-478E-B60A-868CAF346370}
+	EndGlobalSection
+EndGlobal
