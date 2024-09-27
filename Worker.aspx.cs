@@ -10,7 +10,6 @@ namespace findWorker2
     {
         protected void Page_Load(object sender, EventArgs e)
         {
-            // Check if user is logged in
             if (Session["Username"] == null)
             {
                 Response.Redirect("Login.aspx");
@@ -18,13 +17,13 @@ namespace findWorker2
 
             if (!IsPostBack)
             {
-                BindWorksGrid(); // Load all works on first page load
+                BindWorksGrid(); 
+                BindPendingRequestsGrid();
             }
         }
 
         protected void btnSignOut_Click(object sender, EventArgs e)
         {
-            // Clear the session
             Session.Clear();
             Session.Abandon();
             Response.Redirect("Login.aspx");
@@ -33,7 +32,6 @@ namespace findWorker2
         private void BindWorksGrid()
         {
             string connectionString = ConfigurationManager.ConnectionStrings["connectUser"].ConnectionString;
-            // Select all works regardless of status
             string query = "SELECT WorkID, ProviderUsername, Title, Description, Status, DateOfWork, WorkerUsername FROM Works";
 
             using (SqlConnection con = new SqlConnection(connectionString))
@@ -46,22 +44,55 @@ namespace findWorker2
             }
         }
 
+        private void BindPendingRequestsGrid()
+        {
+            string workerUsername = Session["Username"].ToString();
+            string connectionString = ConfigurationManager.ConnectionStrings["connectUser"].ConnectionString;
+            string query = "SELECT r.RequestID, w.Title, r.Status FROM Requests r INNER JOIN Works w ON r.WorkID = w.WorkID WHERE r.WorkerUsername = @WorkerUsername";
+
+            using (SqlConnection con = new SqlConnection(connectionString))
+            {
+                SqlCommand cmd = new SqlCommand(query, con);
+                cmd.Parameters.AddWithValue("@WorkerUsername", workerUsername);
+                con.Open();
+                SqlDataReader reader = cmd.ExecuteReader();
+                gvPendingRequests.DataSource = reader;
+                gvPendingRequests.DataBind();
+            }
+        }
+
         protected void gvWorks_RowCommand(object sender, GridViewCommandEventArgs e)
         {
             if (e.CommandName == "Apply")
             {
-                int workID = Convert.ToInt32(e.CommandArgument); // Get WorkID from CommandArgument
-                string workerUsername = Session["Username"].ToString(); // Get current worker's username
+                int workID = Convert.ToInt32(e.CommandArgument);
+                string workerUsername = Session["Username"].ToString();
 
-                // Update the work status and worker username
                 string connectionString = ConfigurationManager.ConnectionStrings["connectUser"].ConnectionString;
-                string query = "UPDATE Works SET Status = 'Applied', WorkerUsername = @WorkerUsername WHERE WorkID = @WorkID";
+                string checkQuery = "SELECT COUNT(*) FROM Requests WHERE WorkID = @WorkID AND WorkerUsername = @WorkerUsername";
 
                 using (SqlConnection con = new SqlConnection(connectionString))
                 {
-                    SqlCommand cmd = new SqlCommand(query, con);
-                    cmd.Parameters.AddWithValue("@WorkerUsername", workerUsername);
+                    SqlCommand checkCmd = new SqlCommand(checkQuery, con);
+                    checkCmd.Parameters.AddWithValue("@WorkID", workID);
+                    checkCmd.Parameters.AddWithValue("@WorkerUsername", workerUsername);
+                    con.Open();
+                    int count = (int)checkCmd.ExecuteScalar();
+
+                    if (count > 0)
+                    {
+                        lblMessage.Text = "You have already applied for this work.";
+                        lblMessage.ForeColor = System.Drawing.Color.Red;
+                        return;
+                    }
+                }
+
+                string insertQuery = "INSERT INTO Requests (WorkID, WorkerUsername) VALUES (@WorkID, @WorkerUsername)";
+                using (SqlConnection con = new SqlConnection(connectionString))
+                {
+                    SqlCommand cmd = new SqlCommand(insertQuery, con);
                     cmd.Parameters.AddWithValue("@WorkID", workID);
+                    cmd.Parameters.AddWithValue("@WorkerUsername", workerUsername);
 
                     try
                     {
@@ -70,13 +101,13 @@ namespace findWorker2
 
                         if (result > 0)
                         {
-                            lblMessage.Text = "You have successfully applied for the work!";
+                            lblMessage.Text = "Request sent successfully!";
                             lblMessage.ForeColor = System.Drawing.Color.Green;
-                            BindWorksGrid(); // Refresh the grid after applying
+                            BindPendingRequestsGrid(); 
                         }
                         else
                         {
-                            lblMessage.Text = "Failed to apply for the work.";
+                            lblMessage.Text = "Failed to send request.";
                             lblMessage.ForeColor = System.Drawing.Color.Red;
                         }
                     }
@@ -88,5 +119,10 @@ namespace findWorker2
                 }
             }
         }
+
+
+        
+
+
     }
 }

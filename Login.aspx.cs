@@ -2,8 +2,7 @@
 using System.Data.SqlClient;
 using System.Configuration;
 using System.Web.UI;
-using System.Drawing.Printing;
-using System.Web;
+
 
 namespace findWorker2
 {
@@ -15,10 +14,8 @@ namespace findWorker2
 
             if (!IsPostBack)
             {
-                // Check if user is already logged in
                 if (Session["Username"] != null)
                 {
-                    // Redirect to appropriate page based on user type
                     string userType = Session["UserType"].ToString();
                     if (userType == "Provider")
                     {
@@ -31,7 +28,6 @@ namespace findWorker2
                 }
                 else
                 {
-                    // Reset fields
                     txtUsername.Text = "";
                     txtPassword.Text = "";
                     ddlUserType.SelectedIndex = 0;
@@ -42,15 +38,12 @@ namespace findWorker2
 
         protected void btnLogin_Click(object sender, EventArgs e)
         {
-            // Get user inputs
             string username = txtUsername.Text;
             string password = txtPassword.Text;
             string userType = ddlUserType.SelectedValue;
 
-            // Get connection string from Web.config
             string connectionString = ConfigurationManager.ConnectionStrings["connectUser"].ConnectionString;
 
-            // SQL query to check for user existence and validate password
             string query = "SELECT password FROM [dbo].[Users] WHERE username = @Username AND userType = @UserType";
             SqlConnection con = new SqlConnection(connectionString);
 
@@ -67,15 +60,12 @@ namespace findWorker2
 
                     if (dbPassword != null)
                     {
-                        // In btnLogin_Click method
                         if (dbPassword.ToString() == password)
                         {
-                            // Password matches, set session variables
                             Session["Username"] = username;
                             Session["UserType"] = userType;
-                            Session["Password"] = password; 
+                            Session["Password"] = password;
 
-                            // Redirect based on user type
                             if (userType == "Provider")
                             {
                                 Response.Redirect("Provider.aspx");
@@ -84,24 +74,22 @@ namespace findWorker2
                             {
                                 Response.Redirect("Worker.aspx");
                             }
-                        }else
+                        }
+                        else
                         {
                             //Response.Write(dbPassword);
-                            // Password does not match
                             lblMessage.Text = "Password for the given username doesn't match";
                             lblMessage.ForeColor = System.Drawing.Color.Red;
                         }
                     }
                     else
                     {
-                        // Username not found
                         lblMessage.Text = "Username not found for the selected user type.";
                         lblMessage.ForeColor = System.Drawing.Color.Red;
                     }
                 }
                 catch (Exception ex)
                 {
-                    // Handle any errors (e.g., log the error or display a message)
                     lblMessage.Text = "An error occurred: " + ex.Message;
                     lblMessage.ForeColor = System.Drawing.Color.Red;
                 }

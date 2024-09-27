@@ -8,12 +8,10 @@ namespace findWorker2
 {
     public partial class Provider : System.Web.UI.Page
     {
-        // Declare the welcomeUser variable at the class level
         public string welcomeUser;
 
         protected void Page_Load(object sender, EventArgs e)
         {
-            // Check if user is logged in
             if (Session["Username"] == null)
             {
                 Response.Redirect("Login.aspx");
@@ -21,8 +19,9 @@ namespace findWorker2
 
             if (!IsPostBack)
             {
-                LoadUserName(); // Load the user's full name on first page load
-                BindWorksGrid(); // Load works when page loads
+                LoadUserName(); 
+                BindWorksGrid(); 
+                BindRequestsGrid();
             }
         }
 
@@ -31,7 +30,6 @@ namespace findWorker2
             DateTime selectedDate;
             if (DateTime.TryParse(txtDateOfWork.Text, out selectedDate))
             {
-                // Check if the selected date is today or later
                 if (selectedDate >= DateTime.Today)
                 {
                     args.IsValid = true;
@@ -43,7 +41,7 @@ namespace findWorker2
             }
             else
             {
-                args.IsValid = false; // If date parsing fails, mark as invalid
+                args.IsValid = false; 
             }
         }
 
@@ -65,11 +63,11 @@ namespace findWorker2
                     object result = cmd.ExecuteScalar();
                     if (result != null)
                     {
-                        welcomeUser = result.ToString(); // Assign full name to welcomeUser
+                        welcomeUser = result.ToString(); 
                     }
                     else
                     {
-                        welcomeUser = "User"; // Fallback if not found
+                        welcomeUser = "User"; 
                     }
                 }
                 catch (Exception ex)
@@ -95,11 +93,10 @@ namespace findWorker2
                 string title = txtTitle.Text;
                 string description = txtDescription.Text;
                 string providerUsername = Session["Username"].ToString();
-                string workerUsername = "Not applied by anyone yet"; // Default value
-                string status = "Open"; // Default status when adding new work
+                string workerUsername = "Not applied by anyone yet"; 
+                string status = "Open"; 
                 DateTime dateOfWork;
 
-                // Validate and parse the date
                 if (!DateTime.TryParse(txtDateOfWork.Text, out dateOfWork))
                 {
                     lblMessage.Text = "Please enter a valid date.";
@@ -107,10 +104,8 @@ namespace findWorker2
                     return;
                 }
 
-                // Get the connection string from Web.config
                 string connectionString = ConfigurationManager.ConnectionStrings["connectUser"].ConnectionString;
 
-                // SQL query to insert new work
                 string query = "INSERT INTO Works (ProviderUsername, WorkerUsername, Title, Description, Status, DateOfWork) " +
                                "VALUES (@ProviderUsername, @WorkerUsername, @Title, @Description, @Status, @DateOfWork)";
 
@@ -133,7 +128,7 @@ namespace findWorker2
                             lblMessage.Text = "Work added successfully!";
                             lblMessage.ForeColor = System.Drawing.Color.Green;
                             ClearFields();
-                            BindWorksGrid(); // Refresh the grid
+                            BindWorksGrid(); 
                         }
                         else
                         {
@@ -159,15 +154,128 @@ namespace findWorker2
                 {
                     if (lblWorkerUsername.Text == "Not applied by anyone yet")
                     {
-                        lblWorkerUsername.ForeColor = System.Drawing.Color.Red; // Set to red if not applied
+                        lblWorkerUsername.ForeColor = System.Drawing.Color.Red; 
                     }
                     else
                     {
-                        lblWorkerUsername.ForeColor = System.Drawing.Color.Black; // Set to black if applied by a worker
+                        lblWorkerUsername.ForeColor = System.Drawing.Color.Black; 
                     }
                 }
             }
         }
+
+
+        protected void gvRequests_RowCommand(object sender, GridViewCommandEventArgs e)
+        {
+            string connectionString = ConfigurationManager.ConnectionStrings["connectUser"].ConnectionString;
+
+            if (e.CommandName == "Accept")
+            {
+                int requestID = Convert.ToInt32(e.CommandArgument);
+
+                string selectQuery = "SELECT WorkID, WorkerUsername FROM Requests WHERE RequestID = @RequestID";
+                int workID = 0;
+                string workerUsername = "";
+
+                using (SqlConnection con = new SqlConnection(connectionString))
+                {
+                    SqlCommand selectCmd = new SqlCommand(selectQuery, con);
+                    selectCmd.Parameters.AddWithValue("@RequestID", requestID);
+                    con.Open();
+                    SqlDataReader reader = selectCmd.ExecuteReader();
+                    if (reader.Read())
+                    {
+                        workID = Convert.ToInt32(reader["WorkID"]);
+                        workerUsername = reader["WorkerUsername"].ToString();
+                    }
+                    reader.Close();
+                }
+
+                string updateRequestQuery = "UPDATE Requests SET Status = 'Accepted' WHERE RequestID = @RequestID";
+                string updateWorkQuery = "UPDATE Works SET WorkerUsername = @WorkerUsername, Status = 'Assigned' WHERE WorkID = @WorkID";
+
+                using (SqlConnection con = new SqlConnection(connectionString))
+                {
+                    con.Open();
+                    SqlTransaction transaction = con.BeginTransaction();
+
+                    try
+                    {
+                        SqlCommand updateRequestCmd = new SqlCommand(updateRequestQuery, con, transaction);
+                        updateRequestCmd.Parameters.AddWithValue("@RequestID", requestID);
+                        updateRequestCmd.ExecuteNonQuery();
+
+                        SqlCommand updateWorkCmd = new SqlCommand(updateWorkQuery, con, transaction);
+                        updateWorkCmd.Parameters.AddWithValue("@WorkerUsername", workerUsername);
+                        updateWorkCmd.Parameters.AddWithValue("@WorkID", workID);
+                        updateWorkCmd.ExecuteNonQuery();
+
+                        transaction.Commit();
+
+                        lblMessage.Text = "Request accepted successfully!";
+                        lblMessage.ForeColor = System.Drawing.Color.Green;
+                        BindWorksGrid(); 
+                        BindRequestsGrid();
+                    }
+                    catch (Exception ex)
+                    {
+                        transaction.Rollback();
+                        lblMessage.Text = "An error occurred: " + ex.Message;
+                        lblMessage.ForeColor = System.Drawing.Color.Red;
+                    }
+                }
+            }
+            else if (e.CommandName == "Reject") 
+            {
+                int requestID = Convert.ToInt32(e.CommandArgument);
+
+                string updateRequestQuery = "UPDATE Requests SET Status = 'Rejected' WHERE RequestID = @RequestID";
+
+                using (SqlConnection con = new SqlConnection(connectionString))
+                {
+                    SqlCommand updateRequestCmd = new SqlCommand(updateRequestQuery, con);
+                    updateRequestCmd.Parameters.AddWithValue("@RequestID", requestID);
+
+                    try
+                    {
+                        con.Open();
+                        updateRequestCmd.ExecuteNonQuery();
+                        lblMessage.Text = "Request rejected successfully!";
+                        lblMessage.ForeColor = System.Drawing.Color.Green;
+                        BindRequestsGrid(); 
+                    }
+                    catch (Exception ex)
+                    {
+                        lblMessage.Text = "An error occurred: " + ex.Message;
+                        lblMessage.ForeColor = System.Drawing.Color.Red;
+                    }
+                }
+            }
+        }
+
+
+
+        private void BindRequestsGrid()
+        {
+            string providerUsername = Session["Username"].ToString();
+            string connectionString = ConfigurationManager.ConnectionStrings["connectUser"].ConnectionString;
+            string query = "SELECT r.RequestID, r.WorkID, r.WorkerUsername, w.Title, w.Description, r.Status " +
+                           "FROM Requests r INNER JOIN Works w ON r.WorkID = w.WorkID " +
+                           "WHERE w.ProviderUsername = @ProviderUsername";
+
+            using (SqlConnection con = new SqlConnection(connectionString))
+            {
+                SqlCommand cmd = new SqlCommand(query, con);
+                cmd.Parameters.AddWithValue("@ProviderUsername", providerUsername);
+                con.Open();
+                SqlDataReader reader = cmd.ExecuteReader();
+                gvRequests.DataSource = reader;
+                gvRequests.DataBind();
+            }
+        }
+
+
+
 
 
         private void BindWorksGrid()
@@ -191,7 +299,7 @@ namespace findWorker2
         {
             txtTitle.Text = "";
             txtDescription.Text = "";
-            txtDateOfWork.Text = ""; // Clear the date field
+            txtDateOfWork.Text = ""; 
         }
     }
 }

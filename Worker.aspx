@@ -36,6 +36,14 @@
     </Columns>
 </asp:GridView>
 
+            <h2>Your Pending Requests</h2>
+<asp:GridView ID="gvPendingRequests" runat="server" AutoGenerateColumns="False">
+    <Columns>
+        <asp:BoundField DataField="RequestID" HeaderText="Request ID" />
+        <asp:BoundField DataField="Title" HeaderText="Work Title" />
+        <asp:BoundField DataField="Status" HeaderText="Status" />
+    </Columns>
+</asp:GridView>
 
             <asp:Label ID="lblMessage" runat="server" ForeColor="Red"></asp:Label>
 

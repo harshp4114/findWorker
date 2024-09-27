@@ -54,6 +54,28 @@
             <asp:Button ID="btnAddWork" runat="server" Text="Add Work" OnClick="btnAddWork_Click" />
             <asp:Label ID="lblMessage" runat="server" ForeColor="Red"></asp:Label>
 
+<h2>Worker Requests</h2>
+<asp:GridView ID="gvRequests" runat="server" AutoGenerateColumns="False" OnRowCommand="gvRequests_RowCommand">
+    <Columns>
+        <asp:BoundField DataField="RequestID" HeaderText="Request ID" />
+        <asp:BoundField DataField="Title" HeaderText="Work Title" />
+        <asp:BoundField DataField="Description" HeaderText="Description" />
+        <asp:BoundField DataField="WorkerUsername" HeaderText="Worker Username" />
+        <asp:BoundField DataField="Status" HeaderText="Status" />
+        <asp:TemplateField HeaderText="Action">
+            <ItemTemplate>
+                <asp:Button ID="btnAccept" runat="server" CausesValidation="false" Text="Accept" CommandName="Accept" CommandArgument='<%# Eval("RequestID") %>' 
+                    Enabled='<%# Eval("Status").ToString() == "Pending" %>' />
+                <asp:Button ID="btnReject" runat="server" CausesValidation="false" Text="Reject" CommandName="Reject" CommandArgument='<%# Eval("RequestID") %>' 
+                    Enabled='<%# Eval("Status").ToString() == "Pending" %>' />
+            </ItemTemplate>
+        </asp:TemplateField>
+    </Columns>
+</asp:GridView>
+
+
+
+
             <asp:Button ID="btnSignOut" runat="server" Text="Sign Out" OnClick="btnSignOut_Click" CausesValidation="false" />
         </div>
     </form>

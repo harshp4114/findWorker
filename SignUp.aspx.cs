@@ -14,27 +14,23 @@ namespace findWorker2
 
         protected void btnSignUp_Click(object sender, EventArgs e)
         {
-            // Collect user inputs
             string username = txtUsername.Text;
             string password = txtPassword.Text;
             string email = txtEmail.Text;
             string userType = ddlUserType.SelectedValue;
             string fullName = txtFullName.Text;
-            string phoneNum = txtPhoneNum.Text; // Optional field
+            string phoneNum = txtPhoneNum.Text; 
 
-            // Get the connection string from Web.config
             string connectionString = ConfigurationManager.ConnectionStrings["connectUser"].ConnectionString;
 
-            // Check for duplicate username, email, and phone number
             var validationMessage = ValidateUser(username, email, phoneNum, userType, connectionString);
             if (!string.IsNullOrEmpty(validationMessage))
             {
                 lblMessage.Text = validationMessage;
                 lblMessage.ForeColor = System.Drawing.Color.Red;
-                return; // Exit if duplicate is found
+                return; 
             }
 
-            // SQL query to insert data into the Users table
             string query = "INSERT INTO [dbo].[Users] (username, password, email, userType, fullName, phoneNum) " +
                            "VALUES (@Username, @Password, @Email, @UserType, @FullName, @PhoneNum)";
             SqlConnection con = new SqlConnection(connectionString);
@@ -50,7 +46,6 @@ namespace findWorker2
                     cmd.Parameters.AddWithValue("@FullName", fullName);
                     cmd.Parameters.AddWithValue("@PhoneNum", phoneNum);
 
-                    // Open the connection and execute the query
                     con.Open();
                     int result = cmd.ExecuteNonQuery();
 
@@ -58,7 +53,7 @@ namespace findWorker2
                     {
                         lblMessage.Text = "Registration successful!";
                         lblMessage.ForeColor = System.Drawing.Color.Green;
-                        ClearFields(); // Clear fields after successful registration
+                        ClearFields(); 
                     }
                     else
                     {
@@ -68,7 +63,6 @@ namespace findWorker2
                 }
                 catch (Exception ex)
                 {
-                    // Handle exception (e.g., log the error or display a message)
                     lblMessage.Text = "An error occurred: " + ex.Message;
                     lblMessage.ForeColor = System.Drawing.Color.Red;
                 }
@@ -81,7 +75,6 @@ namespace findWorker2
 
             using (SqlConnection con = new SqlConnection(connectionString))
             {
-                // Check for existing username
                 string userQuery = "SELECT COUNT(*) FROM [dbo].[Users] WHERE username = @Username AND userType = @UserType";
                 SqlCommand userCmd = new SqlCommand(userQuery, con);
                 userCmd.Parameters.AddWithValue("@Username", username);
@@ -94,7 +87,6 @@ namespace findWorker2
                     message += "Username is already registered.<br />";
                 }
 
-                // Check for existing email
                 string emailQuery = "SELECT COUNT(*) FROM [dbo].[Users] WHERE email = @Email";
                 SqlCommand emailCmd = new SqlCommand(emailQuery, con);
                 emailCmd.Parameters.AddWithValue("@Email", email);
@@ -104,7 +96,6 @@ namespace findWorker2
                     message += "Email is already registered.<br />";
                 }
 
-                // Check for existing phone number
                 string phoneQuery = "SELECT COUNT(*) FROM [dbo].[Users] WHERE phoneNum = @PhoneNum";
                 SqlCommand phoneCmd = new SqlCommand(phoneQuery, con);
                 phoneCmd.Parameters.AddWithValue("@PhoneNum", phoneNum);
@@ -115,12 +106,12 @@ namespace findWorker2
                 }
             }
 
-            return message; // Return combined messages
+            return message; 
         }
 
         protected void btnLogin_Click(object sender, EventArgs e)
         {
-            Response.Redirect("Login.aspx"); // Navigate to Login page without validation
+            Response.Redirect("Login.aspx"); 
         }
 
         private void ClearFields()
@@ -128,7 +119,7 @@ namespace findWorker2
             txtUsername.Text = "";
             txtPassword.Text = "";
             txtEmail.Text = "";
-            ddlUserType.SelectedIndex = 0; // Reset dropdown to default
+            ddlUserType.SelectedIndex = 0; 
             txtFullName.Text = "";
             txtPhoneNum.Text = "";
         }
