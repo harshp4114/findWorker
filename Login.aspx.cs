@@ -38,6 +38,10 @@ namespace findWorker2
 
         protected void btnLogin_Click(object sender, EventArgs e)
         {
+            // Clear the message label before handling login logic
+            lblMessage.Text = "";
+            lblMessage.ForeColor = System.Drawing.Color.Empty;  // Reset color
+
             string username = txtUsername.Text;
             string password = txtPassword.Text;
             string userType = ddlUserType.SelectedValue;
@@ -77,7 +81,6 @@ namespace findWorker2
                         }
                         else
                         {
-                            //Response.Write(dbPassword);
                             lblMessage.Text = "Password for the given username doesn't match";
                             lblMessage.ForeColor = System.Drawing.Color.Red;
                         }
@@ -95,6 +98,7 @@ namespace findWorker2
                 }
             }
         }
+
 
         protected void btnSignUp_Click(object sender, EventArgs e)
         {

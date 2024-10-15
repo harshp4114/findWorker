@@ -74,9 +74,11 @@
     </Content>
     <Content Include="Login.aspx" />
     <Content Include="Provider.aspx" />
+    <Content Include="ProviderRequests.aspx" />
     <Content Include="SignUp.aspx" />
     <Content Include="Web.config" />
     <Content Include="Worker.aspx" />
+    <Content Include="WorkerRequests.aspx" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Login.aspx.cs">
@@ -94,6 +96,13 @@
     <Compile Include="Provider.aspx.designer.cs">
       <DependentUpon>Provider.aspx</DependentUpon>
     </Compile>
+    <Compile Include="ProviderRequests.aspx.cs">
+      <DependentUpon>ProviderRequests.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="ProviderRequests.aspx.designer.cs">
+      <DependentUpon>ProviderRequests.aspx</DependentUpon>
+    </Compile>
     <Compile Include="SignUp.aspx.cs">
       <DependentUpon>SignUp.aspx</DependentUpon>
       <SubType>ASPXCodeBehind</SubType>
@@ -107,6 +116,13 @@
     </Compile>
     <Compile Include="Worker.aspx.designer.cs">
       <DependentUpon>Worker.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="WorkerRequests.aspx.cs">
+      <DependentUpon>WorkerRequests.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="WorkerRequests.aspx.designer.cs">
+      <DependentUpon>WorkerRequests.aspx</DependentUpon>
     </Compile>
   </ItemGroup>
   <ItemGroup>

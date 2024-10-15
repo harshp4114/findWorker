@@ -11,7 +11,7 @@ namespace findWorker2
 {
 
 
-    public partial class Worker
+    public partial class ProviderRequests
     {
 
         /// <summary>
@@ -24,39 +24,21 @@ namespace findWorker2
         protected global::System.Web.UI.HtmlControls.HtmlForm form1;
 
         /// <summary>
-        /// gvWorks control.
+        /// gvRequests control.
         /// </summary>
         /// <remarks>
         /// Auto-generated field.
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
-        protected global::System.Web.UI.WebControls.GridView gvWorks;
+        protected global::System.Web.UI.WebControls.GridView gvRequests;
 
         /// <summary>
-        /// lblMessage control.
+        /// btnBackToProvider control.
         /// </summary>
         /// <remarks>
         /// Auto-generated field.
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
-        protected global::System.Web.UI.WebControls.Label lblMessage;
-
-        /// <summary>
-        /// btnViewRequests control.
-        /// </summary>
-        /// <remarks>
-        /// Auto-generated field.
-        /// To modify move field declaration from designer file to code-behind file.
-        /// </remarks>
-        protected global::System.Web.UI.WebControls.Button btnViewRequests;
-
-        /// <summary>
-        /// btnSignOut control.
-        /// </summary>
-        /// <remarks>
-        /// Auto-generated field.
-        /// To modify move field declaration from designer file to code-behind file.
-        /// </remarks>
-        protected global::System.Web.UI.WebControls.Button btnSignOut;
+        protected global::System.Web.UI.WebControls.Button btnBackToProvider;
     }
 }

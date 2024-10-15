@@ -17,8 +17,7 @@ namespace findWorker2
 
             if (!IsPostBack)
             {
-                BindWorksGrid(); 
-                BindPendingRequestsGrid();
+                BindWorksGrid();
             }
         }
 
@@ -31,24 +30,12 @@ namespace findWorker2
 
         private void BindWorksGrid()
         {
-            string connectionString = ConfigurationManager.ConnectionStrings["connectUser"].ConnectionString;
-            string query = "SELECT WorkID, ProviderUsername, Title, Description, Status, DateOfWork, WorkerUsername FROM Works";
-
-            using (SqlConnection con = new SqlConnection(connectionString))
-            {
-                SqlCommand cmd = new SqlCommand(query, con);
-                con.Open();
-                SqlDataReader reader = cmd.ExecuteReader();
-                gvWorks.DataSource = reader;
-                gvWorks.DataBind();
-            }
-        }
-
-        private void BindPendingRequestsGrid()
-        {
             string workerUsername = Session["Username"].ToString();
             string connectionString = ConfigurationManager.ConnectionStrings["connectUser"].ConnectionString;
-            string query = "SELECT r.RequestID, w.Title, r.Status FROM Requests r INNER JOIN Works w ON r.WorkID = w.WorkID WHERE r.WorkerUsername = @WorkerUsername";
+            string query = @"SELECT w.WorkID, w.ProviderUsername, w.Title, w.Description, w.Status, w.DateOfWork, w.WorkerUsername,
+                             CASE WHEN r.RequestID IS NOT NULL THEN 1 ELSE 0 END AS HasApplied
+                             FROM Works w
+                             LEFT JOIN Requests r ON w.WorkID = r.WorkID AND r.WorkerUsername = @WorkerUsername";
 
             using (SqlConnection con = new SqlConnection(connectionString))
             {
@@ -56,9 +43,14 @@ namespace findWorker2
                 cmd.Parameters.AddWithValue("@WorkerUsername", workerUsername);
                 con.Open();
                 SqlDataReader reader = cmd.ExecuteReader();
-                gvPendingRequests.DataSource = reader;
-                gvPendingRequests.DataBind();
+                gvWorks.DataSource = reader;
+                gvWorks.DataBind();
             }
+        }
+
+        protected void btnViewRequests_Click(object sender, EventArgs e)
+        {
+            Response.Redirect("WorkerRequests.aspx");
         }
 
         protected void gvWorks_RowCommand(object sender, GridViewCommandEventArgs e)
@@ -82,7 +74,7 @@ namespace findWorker2
                     if (count > 0)
                     {
                         lblMessage.Text = "You have already applied for this work.";
-                        lblMessage.ForeColor = System.Drawing.Color.Red;
+                        lblMessage.Visible = true;
                         return;
                     }
                 }
@@ -102,27 +94,22 @@ namespace findWorker2
                         if (result > 0)
                         {
                             lblMessage.Text = "Request sent successfully!";
-                            lblMessage.ForeColor = System.Drawing.Color.Green;
-                            BindPendingRequestsGrid(); 
+                            lblMessage.Visible = true;
+                            BindWorksGrid();
                         }
                         else
                         {
                             lblMessage.Text = "Failed to send request.";
-                            lblMessage.ForeColor = System.Drawing.Color.Red;
+                            lblMessage.Visible = true;
                         }
                     }
                     catch (Exception ex)
                     {
                         lblMessage.Text = "An error occurred: " + ex.Message;
-                        lblMessage.ForeColor = System.Drawing.Color.Red;
+                        lblMessage.Visible = true;
                     }
                 }
             }
         }
-
-
-        
-
-
     }
 }

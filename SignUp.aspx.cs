@@ -53,7 +53,8 @@ namespace findWorker2
                     {
                         lblMessage.Text = "Registration successful!";
                         lblMessage.ForeColor = System.Drawing.Color.Green;
-                        ClearFields(); 
+                        ClearFields();
+                        Response.Redirect("Login.aspx");
                     }
                     else
                     {
